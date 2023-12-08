@@ -1,0 +1,78 @@
+<resources>
+
+    <!--Вход в приложение-->
+    <string name="enterToAppTitle">Вход в приложение</string>
+    <string name="forgetPassword">Забыли пароль?</string>
+    <string name="email">Email</string>
+    <string name="yourEmail">Ваш еmail</string>
+    <string name="password">Пароль</string>
+    <string name="yourPassword">Ваш пароль</string>
+    <string name="enter">Войти</string>
+    <string name="registrate">Зарегистрироваться</string>
+    <string name="registration">Регистрация</string>
+    <string name="app_name">BreakForYou</string>
+
+    <!--Восстановление пароля-->
+    <string name="passwordRecoveryTitle">Восстановление пароля</string>
+    <string name="passwordRecoveryButton">Восстановить пароль</string>
+
+    <!--Основной экран-->
+    <string name="FreezeTitle">Freeze</string>
+    <string name="PowerMoveTitle">PowerMove</string>
+    <string name="OFPTitle">ОФП</string>
+    <string name="StretchTitle">Stretch</string>
+
+    <!--Shared Preferences-->
+    <string name="appPreference">app_preference</string>
+
+
+    <!--Rating Table-->
+    <string-array name="elementsBDList">
+        <item>rating</item>
+        <item>battle_rating</item>
+        <item>frezze_rating</item>
+        <item>powermove_rating</item>
+        <item>ofp_rating</item>
+        <item>streching_rating</item>
+        <item>babyfrezze</item>
+        <item>chairfrezze</item>
+        <item>elbowfrezze</item>
+        <item>headfrezze</item>
+        <item>headhollowbackfrezze</item>
+        <item>hollowbackfrezze</item>
+        <item>invertfrezze</item>
+        <item>onehandfrezze</item>
+        <item>shoulderfrezze</item>
+        <item>turtlefrezze</item>
+        <item>airflare</item>
+        <item>backSpin</item>
+        <item>cricket</item>
+        <item>elbowairflare</item>
+        <item>flare</item>
+        <item>jackhammer</item>
+        <item>halo</item>
+        <item>headSpin</item>
+        <item>munchmill</item>
+        <item>ninety_nine</item>
+        <item>swipes</item>
+        <item>turtle</item>
+        <item>ufo</item>
+        <item>web</item>
+        <item>windmill</item>
+        <item>wolf</item>
+        <item>angle</item>
+        <item>bridge</item>
+        <item>finger</item>
+        <item>handstand</item>
+        <item>horizont</item>
+        <item>pushups</item>
+        <item>sit_ups</item>
+        <item>press_up_handstand</item>
+        <item>butterfly</item>
+        <item>fold</item>
+        <item>shoulders</item>
+        <item>twine</item>
+
+    </string-array>
+
+</resources>
