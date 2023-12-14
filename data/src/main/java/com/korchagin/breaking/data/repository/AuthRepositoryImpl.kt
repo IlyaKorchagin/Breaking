@@ -1,9 +1,8 @@
 package com.korchagin.breaking.data.repository
 
-import android.util.Log
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import com.korchagin.breaking.common.Resource
+import com.korchagin.breaking.domain.common.Resource
 import com.korchagin.breaking.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

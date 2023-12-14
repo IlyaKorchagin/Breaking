@@ -2,14 +2,13 @@ package com.korchagin.breaking.data.repository
 
 import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
-import com.korchagin.breaking.common.Result
+import com.korchagin.breaking.domain.common.Result
 import com.korchagin.breaking.data.helper.PupilMapper
 import com.korchagin.breaking.data.storage.models.PupilEntry
 import com.korchagin.breaking.domain.model.PupilEntity
 import com.korchagin.breaking.domain.repository.PupilRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.HashMap
 import javax.inject.Inject
@@ -24,7 +23,7 @@ class PupilRepositoryImpl @Inject constructor(
 
         database.orderByChild(filter).get().addOnSuccessListener {
        //     Log.d("ILYA", "Got value OnSuccess ${it.value}")
-            var pupilList: MutableList<PupilEntity> =
+            val pupilList: MutableList<PupilEntity> =
                 emptyList<PupilEntity>().toMutableList()
             if (it!!.exists()) {
                 for (e in it.children) {

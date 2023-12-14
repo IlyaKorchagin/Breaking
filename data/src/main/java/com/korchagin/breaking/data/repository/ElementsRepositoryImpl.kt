@@ -1,7 +1,7 @@
 package com.korchagin.breaking.data.repository
 
 import com.google.firebase.database.FirebaseDatabase
-import com.korchagin.breaking.common.Result
+import com.korchagin.breaking.domain.common.Result
 import com.korchagin.breaking.data.helper.ElementMapper
 import com.korchagin.breaking.data.storage.models.ElementEntry
 import com.korchagin.breaking.domain.model.ElementEntity
@@ -25,7 +25,7 @@ class ElementsRepositoryImpl @Inject constructor(
 
     override suspend fun getFreezeElements() = callbackFlow<Result<List<ElementEntity>>> {
         freezeDB.get().addOnSuccessListener {
-            var freezeList: MutableList<ElementEntity> =
+            val freezeList: MutableList<ElementEntity> =
                 emptyList<ElementEntity>().toMutableList()
             if (it!!.exists()) {
                 for (e in it.children) {
@@ -54,7 +54,7 @@ class ElementsRepositoryImpl @Inject constructor(
 
     override suspend fun getPowerMoveElements() = callbackFlow<Result<List<ElementEntity>>> {
         powerDB.get().addOnSuccessListener {
-            var powerList: MutableList<ElementEntity> =
+            val powerList: MutableList<ElementEntity> =
                 emptyList<ElementEntity>().toMutableList()
             if (it!!.exists()) {
                 for (e in it.children) {
@@ -76,7 +76,7 @@ class ElementsRepositoryImpl @Inject constructor(
 
     override suspend fun getOfpElements() = callbackFlow<Result<List<ElementEntity>>> {
         ofpDB.get().addOnSuccessListener {
-            var ofpList: MutableList<ElementEntity> =
+            val ofpList: MutableList<ElementEntity> =
                 emptyList<ElementEntity>().toMutableList()
             if (it!!.exists()) {
                 for (e in it.children) {
@@ -97,7 +97,7 @@ class ElementsRepositoryImpl @Inject constructor(
 
     override suspend fun getStretchElements() = callbackFlow<Result<List<ElementEntity>>> {
         stretchDB.get().addOnSuccessListener {
-            var stretchList: MutableList<ElementEntity> =
+            val stretchList: MutableList<ElementEntity> =
                 emptyList<ElementEntity>().toMutableList()
             if (it!!.exists()) {
                 for (e in it.children) {

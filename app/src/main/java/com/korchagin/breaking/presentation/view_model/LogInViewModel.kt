@@ -1,9 +1,8 @@
 package com.korchagin.breaking.presentation.view_model
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.korchagin.breaking.common.Resource
+import com.korchagin.breaking.domain.common.Resource
 import com.korchagin.breaking.domain.repository.AuthRepository
 import com.korchagin.breaking.presentation.model.SignInState
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -38,7 +38,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.korchagin.breaking.R
-import com.korchagin.breaking.common.Status
 import com.korchagin.breaking.domain.common.*
 import com.korchagin.breaking.domain.model.ElementEntity
 import com.korchagin.breaking.domain.model.PupilEntity
@@ -51,7 +50,6 @@ import com.korchagin.breaking.presentation.screens.common.shimmerBrush
 import com.korchagin.breaking.presentation.view_model.ElementViewModel
 import com.korchagin.breaking.presentation.view_model.MainViewModel
 import com.korchagin.breaking.ui.theme.Progress
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
@@ -64,10 +62,12 @@ fun ElementsScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     var selectedTabIndex by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
     selectedTabIndex = sharedViewModel.elementTabPosition
+
     val state = viewModel.curPupil.collectAsState(initial = null)
+    Log.d("ILYA","state = $state")
     val stateFreeze = viewModel.freezeList.collectAsState(initial = null)
     val statePower = viewModel.powerMoveList.collectAsState(initial = null)
     val stateOfp = viewModel.ofpList.collectAsState(initial = null)
@@ -106,6 +106,7 @@ fun ElementsScreen(
 
         if (state.value!!.status == Status.SUCCESS) {
             Column {
+                Log.d("ILYA","state.value = ${state.value!!.data}")
                 state.value!!.data?.let { ProfileSection(it, viewModel) }
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -305,11 +306,11 @@ fun RoundImage(
 fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
     val showShimmer = remember { mutableStateOf(true) }
     //  Log.d("ILYA", "ProfileSection run")
-    val scope = rememberCoroutineScope()
 
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val bitmap = remember {
         mutableStateOf<Bitmap?>(null)
@@ -336,6 +337,7 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
                         shape = RoundedCornerShape(percent = 50)
                     )
             ) {
+                Log.d("ILYA","avatar = ${curPupil.avatar}")
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(curPupil.avatar)
@@ -371,6 +373,9 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
         scope.launch {
             //   Log.d("ILYA", "imageUri = $imageUri")
             imageUri?.let {
+             /*   val storageRef = Firebase.storage.reference
+                storageRef.child("ImageDB/avatar.jpg").putFile(it).await()*/
+
                 Log.d("ILYA", "imageUri = $imageUri")
                 if (Build.VERSION.SDK_INT < 28) {
                     bitmap.value = MediaStore.Images
@@ -382,7 +387,6 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
                     bitmap.value = ImageDecoder.decodeBitmap(source)
                 }
             }
-            Log.d("ILYA", "bitmap = ${bitmap.value}")
             bitmap.value?.let { viewModel.uploadImage(it) }
         }
     }
@@ -393,7 +397,6 @@ fun InfoSection(
     curPupil: PupilEntity,
     modifier: Modifier = Modifier
 ) {
-    // Log.d("ILYA", "InfoSection run")
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceAround,
@@ -533,8 +536,8 @@ fun PostSection(
             .padding(bottom = 57.dp)
     ) {
         itemsIndexed(posts) { index, value ->
-            var startBackgroundColor = Color.White
-            var endBackgroundColor = setElementColor(value.title)
+            val startBackgroundColor = Color.White
+            val endBackgroundColor = setElementColor(value.title)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -551,7 +554,7 @@ fun PostSection(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                var borderColor = setElementColor(value.title)
+                val borderColor = setElementColor(value.title)
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(value.icon)

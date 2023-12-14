@@ -1,7 +1,7 @@
 package com.korchagin.breaking.domain.repository
 
 import com.google.firebase.auth.AuthResult
-import com.korchagin.breaking.common.Resource
+import com.korchagin.breaking.domain.common.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {

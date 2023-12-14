@@ -1,7 +1,6 @@
 package com.korchagin.breaking.domain.repository
 
-import com.korchagin.breaking.common.Result
-import com.korchagin.breaking.domain.model.Pupil
+import com.korchagin.breaking.domain.common.Result
 import com.korchagin.breaking.domain.model.PupilEntity
 import kotlinx.coroutines.flow.Flow
 import java.util.HashMap

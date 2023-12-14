@@ -1,5 +1,7 @@
 package com.korchagin.breaking.presentation.screens
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,8 +32,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.korchagin.breaking.R
-import com.korchagin.breaking.common.Result
-import com.korchagin.breaking.common.Status
+import com.korchagin.breaking.domain.common.Result
+import com.korchagin.breaking.domain.common.Status
 import com.korchagin.breaking.domain.model.PupilEntity
 import com.korchagin.breaking.helper.setPositionBackgroundColor
 import com.korchagin.breaking.helper.setPositionColor
@@ -44,6 +46,7 @@ import com.korchagin.breaking.presentation.screens.common.shimmerBrush
 import com.korchagin.breaking.presentation.view_model.AllPupilsViewModel
 import com.korchagin.breaking.ui.theme.Progress
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RatingScreen(
     onComposing: (AppBarState) -> Unit,
@@ -53,16 +56,6 @@ fun RatingScreen(
     val checkedState = remember { mutableStateOf(true) }
 
     val state = viewModel.pupilList.collectAsState(initial = null)
-
-    val elementsArray = stringArrayResource(R.array.elementsBDList)
-
-    var selectedItem by remember {
-        mutableStateOf(elementsArray[0])
-    }
-
-    var expanded by remember {
-        mutableStateOf(false)
-    }
 
     if (state.value == null) viewModel.getAllPupils("rating")
 
@@ -156,8 +149,8 @@ fun NewRatingTable(
             .padding(bottom = 57.dp)
     ) {
         itemsIndexed(ratingList) { index, value ->
-            var startBackgroundColor = Color.White
-            var endBackgroundColor = setPositionBackgroundColor(index)
+            val startBackgroundColor = Color.White
+            val endBackgroundColor = setPositionBackgroundColor(index)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -172,6 +165,7 @@ fun NewRatingTable(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                Log.d("ILYA","(image = ${value.avatar}")
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current).data(value.avatar)
                         .crossfade(true).build(),
@@ -197,7 +191,7 @@ fun NewRatingTable(
                         text = value.name, letterSpacing = 1.sp
                     )
                     Spacer(modifier = Modifier.height(5.dp))
-                    value.rating?.let { progress ->
+                    value.rating.let { progress ->
                         CustomProgressBar(
                             Modifier
                                 .clip(shape = RoundedCornerShape(5.dp))
@@ -314,7 +308,7 @@ fun RatingTable(
                                 .padding(start = 10.dp, end = 10.dp)
                                 .fillMaxWidth(0.7f), contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "${item.name}", fontSize = fontSize.sp, color = color)
+                            Text(text = item.name, fontSize = fontSize.sp, color = color)
                         }
 
                         Box(

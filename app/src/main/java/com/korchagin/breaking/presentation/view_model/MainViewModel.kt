@@ -3,9 +3,9 @@ package com.korchagin.breaking.presentation.view_model
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.*
-import com.korchagin.breaking.common.Resource
-import com.korchagin.breaking.common.Result
-import com.korchagin.breaking.common.Status
+import com.korchagin.breaking.domain.common.Resource
+import com.korchagin.breaking.domain.common.Result
+import com.korchagin.breaking.domain.common.Status
 import com.korchagin.breaking.domain.common.EMAIL_KEY
 import com.korchagin.breaking.domain.common.Preferences
 import com.korchagin.breaking.domain.model.ElementEntity
@@ -13,6 +13,7 @@ import com.korchagin.breaking.domain.model.PupilEntity
 import com.korchagin.breaking.domain.usecase.*
 import com.korchagin.breaking.presentation.model.MediaState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -56,9 +57,12 @@ class MainViewModel @Inject constructor(
     val stretchList = _stretchList
         .receiveAsFlow()
 
+    var pupilEmail: String = ""
+
     init {
         savedStateHandle.get<String>(EMAIL_KEY)?.let { email ->
-            getCurrentPupil(email.substringAfter('}'))
+            pupilEmail = email.substringAfter('}')
+            getCurrentPupil(pupilEmail)
             getFreezeElements()
             getPowerMoveElements()
             getOfpElements()
@@ -67,20 +71,21 @@ class MainViewModel @Inject constructor(
     }
 
     fun getFreezeElements() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getFreezeElementsUseCase.invoke().collect {
-              //    Log.d("ILYA", "get freeze - ${it.status} | ${it.data}")
+                //    Log.d("ILYA", "get freeze - ${it.status} | ${it.data}")
                 _freezeList.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
-                 //       Log.d("ILYA", "Success get data")
+                        //       Log.d("ILYA", "Success get data")
                         it.data?.let { items ->
-                       //     Log.d("ILYA", "Success get data $items")
+                            //     Log.d("ILYA", "Success get data $items")
                             _freezeList.send(Result.success(items))
                         }
                     }
+
                     Status.ERROR -> {
-                    //    Log.d("ILYA", "Success get error")
+                        //    Log.d("ILYA", "Success get error")
                         _freezeList.send(
                             Result.error(
                                 "Failed to grab items from Firebase",
@@ -88,6 +93,7 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
+
                     else -> {}
                 }
             }
@@ -95,18 +101,19 @@ class MainViewModel @Inject constructor(
     }
 
     fun getPowerMoveElements() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getPowerMoveElementsUseCase.invoke().collect {
-                    Log.d("ILYA", "get power - ${it.status} | ${it.data}")
+                Log.d("ILYA", "get power - ${it.status} | ${it.data}")
                 _powerMoveList.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
-                               Log.d("ILYA", "Success get data")
+                        Log.d("ILYA", "Success get data")
                         it.data?.let { items ->
-                                 Log.d("ILYA", "Success get data $items")
+                            Log.d("ILYA", "Success get data $items")
                             _powerMoveList.send(Result.success(items))
                         }
                     }
+
                     Status.ERROR -> {
                         //    Log.d("ILYA", "Success get error")
                         _powerMoveList.send(
@@ -116,6 +123,7 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
+
                     else -> {}
                 }
             }
@@ -123,7 +131,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun getOfpElements() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getOfpElementsUseCase.invoke().collect {
                 Log.d("ILYA", "get power - ${it.status} | ${it.data}")
                 _ofpList.send(Result.loading(null))
@@ -135,6 +143,7 @@ class MainViewModel @Inject constructor(
                             _ofpList.send(Result.success(items))
                         }
                     }
+
                     Status.ERROR -> {
                         //    Log.d("ILYA", "Success get error")
                         _ofpList.send(
@@ -144,6 +153,7 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
+
                     else -> {}
                 }
             }
@@ -151,7 +161,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun getStretchElements() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getStretchElementsUseCase.invoke().collect {
                 Log.d("ILYA", "get power - ${it.status} | ${it.data}")
                 _stretchList.send(Result.loading(null))
@@ -163,6 +173,7 @@ class MainViewModel @Inject constructor(
                             _stretchList.send(Result.success(items))
                         }
                     }
+
                     Status.ERROR -> {
                         //    Log.d("ILYA", "Success get error")
                         _stretchList.send(
@@ -172,6 +183,7 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
+
                     else -> {}
                 }
             }
@@ -179,21 +191,22 @@ class MainViewModel @Inject constructor(
     }
 
     fun getCurrentPupil(email: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getCurrentPupilUseCase.invoke(email).collect {
                 //  Log.d("ILYA", "get ${it.status}")
                 _curPupil.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
-                    //    Log.d("ILYA", "Success get data")
+                        //    Log.d("ILYA", "Success get data")
                         it.data?.let { items ->
-                         //   Log.d("ILYA", "Success get data $items")
+                            //   Log.d("ILYA", "Success get data $items")
                             _curPupil.send(Result.success(items))
                             items.id?.let { it1 -> preferences.storeCurrentPupilId(it1) }
                         }
                     }
+
                     Status.ERROR -> {
-                     //   Log.d("ILYA", "Success get error")
+                        //   Log.d("ILYA", "Success get error")
                         _curPupil.send(
                             Result.error(
                                 "Failed to grab items from Firebase",
@@ -201,31 +214,35 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
+
                     else -> {}
                 }
             }
         }
     }
 
-    fun updateAvatar(userId: String, userAvatar: HashMap<String?, Any?>) {
+    private fun updateAvatar(userId: String, userAvatar: HashMap<String?, Any?>) {
         viewModelScope.launch {
             updateAvatarUseCase.invoke(userId = userId, userAvatar = userAvatar).collect {
                 when (it.status) {
                     Status.SUCCESS -> {
-                    //    Log.d("ILYA", "Success update data")
+                        Log.d("ILYA", "Success update data")
                         /*  it.data?.let { items ->
                               Log.d("ILYA", "Success get data $items")
                               _curPupil.send(Result.success(items))
                           }*/
+                        getCurrentPupil(pupilEmail)
                     }
+
                     Status.ERROR -> {
-                 //       Log.d("ILYA", "update error")
+                        //       Log.d("ILYA", "update error")
                         /*_curPupil.send( Result.error(
                             "Failed to grab items from Firebase",
                             PupilEntity()
                         )
                         )*/
                     }
+
                     else -> {}
                 }
             }
@@ -242,18 +259,20 @@ class MainViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     Log.d("ILYA", "Success - ${result.data}")
-                    _mediaState.send(MediaState(isSuccess = result.data))
+                    //  _mediaState.send(MediaState(isSuccess = result.data))
                     val hashMap: HashMap<String?, Any?> = HashMap<String?, Any?>()
                     hashMap["avatar"] = result.data
                     val id = preferences.getCurrentPupilId()
                     Log.d("ILYA", "Success currentPupilId - $id")
                     updateAvatar(id, hashMap)
                 }
+
                 is Resource.Loading -> {
-                    _mediaState.send(MediaState(isLoading = true))
+                    // _mediaState.send(MediaState(isLoading = true))
                 }
+
                 is Resource.Error -> {
-                    _mediaState.send(MediaState(isError = result.message))
+                    //  _mediaState.send(MediaState(isError = result.message))
                 }
             }
         }

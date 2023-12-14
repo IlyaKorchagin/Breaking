@@ -2,8 +2,8 @@ package com.korchagin.breaking.presentation.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.korchagin.breaking.common.Result
-import com.korchagin.breaking.common.Status
+import com.korchagin.breaking.domain.common.Result
+import com.korchagin.breaking.domain.common.Status
 import com.korchagin.breaking.domain.model.PupilEntity
 import com.korchagin.breaking.domain.usecase.GetPupilsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
