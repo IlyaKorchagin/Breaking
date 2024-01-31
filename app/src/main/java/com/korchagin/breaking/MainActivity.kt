@@ -2,15 +2,24 @@ package com.korchagin.breaking
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -20,22 +29,21 @@ import com.korchagin.breaking.presentation.Screen
 import com.korchagin.breaking.presentation.model.BottomNavItem
 import com.korchagin.breaking.presentation.model.MenuItem
 import com.korchagin.breaking.presentation.screens.BottomNavigationBar
-import com.korchagin.breaking.presentation.screens.DrawerBody
-import com.korchagin.breaking.presentation.screens.DrawerHeader
 import com.korchagin.breaking.presentation.screens.common.AppBarState
+import com.korchagin.breaking.presentation.screens.main_screen.DrawerBody
+import com.korchagin.breaking.presentation.screens.main_screen.DrawerHeader
 import com.korchagin.breaking.presentation.view_model.LogInViewModel
-import com.korchagin.breaking.presentation.view_model.MainViewModel
 import com.korchagin.breaking.ui.theme.MainGreen
 import com.korchagin.breaking.ui.theme.NavigationDrawerComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<LogInViewModel>()
+    private val loginViewModel by viewModels<LogInViewModel>()
 
-
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,14 +59,14 @@ class MainActivity : ComponentActivity() {
             NavigationDrawerComposeTheme {
                 val navController = rememberNavController()
                 val scaffoldState = rememberScaffoldState()
-                val scope = rememberCoroutineScope()
-                val state = viewModel.currentEmail.collectAsState(initial = null)
+                val stateEmail = loginViewModel.currentEmail.collectAsState(initial = null)
                 val systemUiController = rememberSystemUiController()
+
 
                 systemUiController.setSystemBarsColor(
                     color = MainGreen
                 )
-                var appBarState by remember {
+                val appBarState by remember {
                     mutableStateOf(AppBarState())
                 }
 
@@ -69,25 +77,27 @@ class MainActivity : ComponentActivity() {
                             && currentRoute(navController) != Screen.SignUpScreen.route
                             && currentRoute(navController) != Screen.SplashScreen.route
                             && currentRoute(navController) != Screen.PasswordRecoveryScreen.route
+                            && currentRoute(navController) != Screen.DetailScreen.route
+                            && currentRoute(navController) != Screen.BboysDetailScreen.route
                         ) {
                             BottomNavigationBar(
                                 items = listOf(
                                     BottomNavItem(
-                                        name = "Home",
-                                        route = Screen.MainScreen.route,
+                                        name = applicationContext.getString(R.string.home),
+                                        route = Screen.ElementsScreen.route /*+ stateEmail.value*/,
                                         icon = Icons.Default.Home
                                     ),
                                     BottomNavItem(
-                                        name = "Rating",
+                                        name = applicationContext.getString(R.string.rating),
                                         route = Screen.RatingScreen.route,
-                                        icon = Icons.Default.Notifications
+                                        icon = Icons.Default.Star
                                     ),
                                     BottomNavItem(
-                                        name = "Settings",
-                                        route = Screen.ElementsScreen.route + state.value,
-                                        icon = Icons.Default.Settings
+                                        name = applicationContext.getString(R.string.prize),
+                                        route = Screen.BboysScreen.route,
+                                        icon = Icons.Default.Favorite
 
-                                    ),
+                                    )
                                 ),
                                 navController = navController,
                                 onItemClick = {
@@ -129,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                 onItemClick = {
                                     when (it.title) {
                                         "Home" -> {
-                                            navController.navigate(route = Screen.ElementsScreen.route + state.value)
+                                            navController.navigate(route = Screen.ElementsScreen.route /*+ stateEmail.value*/)
                                         }
                                         "Rating" -> {
                                             navController.navigate(Screen.RatingScreen.route)
@@ -155,7 +165,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun AuthState() {
         val scope = rememberCoroutineScope()
-        scope.launch { viewModel.checkVerification() }
+        scope.launch { loginViewModel.checkVerification() }
     }
 
 }

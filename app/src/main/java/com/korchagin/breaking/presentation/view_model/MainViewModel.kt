@@ -8,6 +8,7 @@ import com.korchagin.breaking.domain.common.Result
 import com.korchagin.breaking.domain.common.Status
 import com.korchagin.breaking.domain.common.EMAIL_KEY
 import com.korchagin.breaking.domain.common.Preferences
+import com.korchagin.breaking.domain.model.BboyEntity
 import com.korchagin.breaking.domain.model.ElementEntity
 import com.korchagin.breaking.domain.model.PupilEntity
 import com.korchagin.breaking.domain.usecase.*
@@ -26,6 +27,7 @@ import kotlin.collections.set
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private val getBboysUseCase: GetBboyUseCase,
     private val getCurrentPupilUseCase: GetCurrentPupilUseCase,
     private val updateAvatarUseCase: UpdateAvatarUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
@@ -42,6 +44,9 @@ class MainViewModel @Inject constructor(
 
     private val _mediaState = Channel<MediaState>()
     val mediaState = _mediaState.receiveAsFlow()
+
+    val _bboysList = Channel<Result<List<BboyEntity>>>()
+    val bboysList = _bboysList.receiveAsFlow()
 
     val _freezeList = Channel<Result<List<ElementEntity>>>()
     val freezeList = _freezeList.receiveAsFlow()
@@ -67,6 +72,7 @@ class MainViewModel @Inject constructor(
             getPowerMoveElements()
             getOfpElements()
             getStretchElements()
+            getBboys()
         }
     }
 
@@ -87,6 +93,35 @@ class MainViewModel @Inject constructor(
                     Status.ERROR -> {
                         //    Log.d("ILYA", "Success get error")
                         _freezeList.send(
+                            Result.error(
+                                "Failed to grab items from Firebase",
+                                null
+                            )
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+    fun getBboys() {
+        viewModelScope.launch(Dispatchers.IO) {
+            getBboysUseCase.invoke().collect {
+                //    Log.d("ILYA", "get freeze - ${it.status} | ${it.data}")
+                _bboysList.send(Result.loading(null))
+                when (it.status) {
+                    Status.SUCCESS -> {
+                        //       Log.d("ILYA", "Success get data")
+                        it.data?.let { items ->
+                            //     Log.d("ILYA", "Success get data $items")
+                            _bboysList.send(Result.success(items))
+                        }
+                    }
+
+                    Status.ERROR -> {
+                        //    Log.d("ILYA", "Success get error")
+                        _bboysList.send(
                             Result.error(
                                 "Failed to grab items from Firebase",
                                 null
@@ -193,7 +228,7 @@ class MainViewModel @Inject constructor(
     fun getCurrentPupil(email: String) {
         viewModelScope.launch(Dispatchers.IO) {
             getCurrentPupilUseCase.invoke(email).collect {
-                //  Log.d("ILYA", "get ${it.status}")
+                  Log.d("ILYA", "get ${it.status}")
                 _curPupil.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
@@ -201,7 +236,7 @@ class MainViewModel @Inject constructor(
                         it.data?.let { items ->
                             //   Log.d("ILYA", "Success get data $items")
                             _curPupil.send(Result.success(items))
-                            items.id?.let { it1 -> preferences.storeCurrentPupilId(it1) }
+                            items.id.let { it1 -> preferences.storeCurrentPupilId(it1) }
                         }
                     }
 
@@ -254,7 +289,7 @@ class MainViewModel @Inject constructor(
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
         Log.d("ILYA", "uploadImage data = $data")
-        uploadImageUseCase.invoke(data).collect { result ->
+        uploadImageUseCase.invoke(data, pupilEmail).collect { result ->
             Log.d("ILYA", "uploadImage result = ${result.data}")
             when (result) {
                 is Resource.Success -> {

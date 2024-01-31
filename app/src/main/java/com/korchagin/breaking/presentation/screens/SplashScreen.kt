@@ -3,8 +3,11 @@ package com.korchagin.breaking.presentation.screens
 import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,8 +23,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.korchagin.breaking.BuildConfig
-import com.korchagin.breaking.R
 import com.korchagin.breaking.presentation.Screen
 import com.korchagin.breaking.presentation.view_model.LogInViewModel
 import com.korchagin.breaking.ui.theme.MainGreen
@@ -34,7 +38,7 @@ fun SplashScreen(navController: NavController, viewModel: LogInViewModel = hiltV
         .fillMaxWidth()
         .fillMaxHeight()
 ) {
-
+    val splashImage = "https://firebasestorage.googleapis.com/v0/b/goodfootbreaking.appspot.com/o/Logo%2Fhip-hop.png?alt=media&token=3408c247-c8fd-4b69-b38e-20237caea4e5"
     val scale = remember {
         androidx.compose.animation.core.Animatable(0.0f)
     }
@@ -48,8 +52,8 @@ fun SplashScreen(navController: NavController, viewModel: LogInViewModel = hiltV
                 OvershootInterpolator(4f).getInterpolation(it)
             })
         )
-        delay(1000)
-       // Log.d("ILYA","stateEmail = ${stateCurrentEmail.value}")
+        delay(1500)
+        Log.d("ILYA","stateEmail = ${stateCurrentEmail.value}")
         if(stateCurrentEmail.value.isNullOrEmpty()) {
             navController.navigate(Screen.LogInScreen.route) {
                 popUpTo(Screen.SplashScreen.route) {
@@ -58,20 +62,21 @@ fun SplashScreen(navController: NavController, viewModel: LogInViewModel = hiltV
             }
         }
         else{
-          //  Log.d("ILYA","email = ${stateCurrentEmail.value}")
+            Log.d("ILYA","email = ${stateCurrentEmail.value}")
             navController.navigate(Screen.ElementsScreen.route + stateCurrentEmail.value) {
             popUpTo(Screen.SplashScreen.route) {
                 inclusive = true
             }
         }}
     }
-
-    Image(
-        painter = painterResource(id = R.drawable.airflare),
-        contentDescription = "",
-        alignment = Alignment.Center, modifier = Modifier
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(splashImage)
+            .crossfade(true)
+            .build(),
+        contentDescription = "default crossfade example",
+        modifier = Modifier
             .fillMaxSize()
-            .padding(40.dp)
     )
 
     Text(

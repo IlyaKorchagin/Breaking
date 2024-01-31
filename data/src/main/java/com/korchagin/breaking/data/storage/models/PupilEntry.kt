@@ -97,6 +97,8 @@ data class PupilEntry(
     var handstand: Int? = 0,
     var horizont: Int? = 0,
     var pushups: Int? = 0,
+    var sit_ups: Int? = 0,
+    var press_up_handstand: Int? = 0,
 
     //<----------- OFP <-------------
 

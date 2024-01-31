@@ -1,5 +1,6 @@
 package com.korchagin.breaking.presentation.view_model
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.korchagin.breaking.domain.common.Resource
@@ -27,12 +28,15 @@ class LogInViewModel @Inject constructor(
     private val _passwordRecoveryState = Channel<SignInState>()
     val passwordRecoveryState = _passwordRecoveryState.receiveAsFlow()
 
+    private val _userName = Channel<SignInState>()
+    val userName = _userName.receiveAsFlow()
+
     suspend fun checkVerification(){
-       // Log.d("ILYA","checkVerification() - ${repository.checkVerification()}")
+        Log.d("ILYA","checkVerification() - ${repository.checkVerification()}")
         _currentEmail.send(repository.checkVerification())
     }
-    fun registerUser(email: String, password: String) = viewModelScope.launch {
-        repository.registerUser(email,password).collect{result->
+    fun registerUser(email: String, password: String, name: String) = viewModelScope.launch {
+        repository.registerUser(email,password, name).collect{result->
             when(result){
                 is Resource.Success -> {
                     _signUpState.send(SignInState(isSuccess = "Sign In Success", isVerification = repository.sendEmailVerification()))
@@ -61,6 +65,10 @@ class LogInViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun signOut() = viewModelScope.launch {
+        repository.signOut()
     }
 
      fun passwordRecovery(email: String) {

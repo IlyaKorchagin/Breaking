@@ -6,10 +6,12 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.korchagin.breaking.data.repository.AuthRepositoryImpl
+import com.korchagin.breaking.data.repository.BboysRepositoryImpl
 import com.korchagin.breaking.data.repository.ElementsRepositoryImpl
 import com.korchagin.breaking.data.repository.PupilRepositoryImpl
 import com.korchagin.breaking.data.repository.StorageRepositoryImpl
 import com.korchagin.breaking.domain.repository.AuthRepository
+import com.korchagin.breaking.domain.repository.BboyRepository
 import com.korchagin.breaking.domain.repository.ElementsRepository
 import com.korchagin.breaking.domain.repository.PupilRepository
 import com.korchagin.breaking.domain.repository.StorageRepository
@@ -35,8 +37,8 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepositoryImpl(firebaseAuth: FirebaseAuth): AuthRepository {
-        return AuthRepositoryImpl(firebaseAuth)
+    fun provideAuthRepositoryImpl(firebaseAuth: FirebaseAuth, firebaseDatabase: FirebaseDatabase): AuthRepository {
+        return AuthRepositoryImpl(firebaseAuth, firebaseDatabase)
     }
 
     @Provides

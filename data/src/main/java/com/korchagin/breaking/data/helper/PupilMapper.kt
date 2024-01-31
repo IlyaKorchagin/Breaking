@@ -61,6 +61,8 @@ class PupilMapper : Mapper<PupilEntry?, PupilEntity> {
         finger = input?.finger ?: 0,
         handstand = input?.handstand ?: 0,
         horizont = input?.horizont ?: 0,
+        situps = input?.sit_ups?:0,
+        presstohands = input?.press_up_handstand ?: 0,
         pushups = input?.pushups ?: 0,
 
         butterfly = input?.butterfly ?: 0,

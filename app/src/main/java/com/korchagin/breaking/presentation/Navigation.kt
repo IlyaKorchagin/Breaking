@@ -1,26 +1,26 @@
 package com.korchagin.breaking.presentation
 
-import android.util.Log
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.runtime.*
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.korchagin.breaking.domain.common.EMAIL_KEY
-import com.korchagin.breaking.presentation.screens.*
+import com.korchagin.breaking.presentation.screens.BboysDetailScreen
+import com.korchagin.breaking.presentation.screens.DetailScreen
+import com.korchagin.breaking.presentation.screens.ElementsScreen
+import com.korchagin.breaking.presentation.screens.LogInScreen
+import com.korchagin.breaking.presentation.screens.PasswordRecoveryScreen
+import com.korchagin.breaking.presentation.screens.BboysScreen
+import com.korchagin.breaking.presentation.screens.RatingScreen
+import com.korchagin.breaking.presentation.screens.SignUpScreen
+import com.korchagin.breaking.presentation.screens.SplashScreen
 import com.korchagin.breaking.presentation.screens.common.AppBarState
-import com.korchagin.breaking.presentation.screens.main_screen.MainScreen
 import com.korchagin.breaking.presentation.view_model.ElementViewModel
-import com.korchagin.breaking.presentation.view_model.SharedViewModel
 
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Navigation(navController: NavHostController, appBarState: AppBarState) {
     val sharedViewModel: ElementViewModel = viewModel()
@@ -38,12 +38,15 @@ fun Navigation(navController: NavHostController, appBarState: AppBarState) {
         composable(route = Screen.SignUpScreen.route) {
             SignUpScreen(navController = navController)
         }
+        composable(route = Screen.BboysScreen.route) {
+            BboysScreen(navController = navController, sharedViewModel = sharedViewModel)
+        }
+        composable(route = Screen.BboysDetailScreen.route) {
+            BboysDetailScreen(navController = navController, sharedViewModel = sharedViewModel)
+        }
         composable(route = Screen.DetailScreen.route
         ) {
             DetailScreen(navController = navController, sharedViewModel = sharedViewModel)
-        }
-        composable(route = Screen.MainScreen.route) {
-            MainScreen(navController = navController)
         }
         composable(
             route = Screen.ElementsScreen.route,

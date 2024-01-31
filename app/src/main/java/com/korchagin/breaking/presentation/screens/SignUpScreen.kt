@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,6 +40,7 @@ fun SignUpScreen(
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signUpState.collectAsState(initial = null)
@@ -93,10 +95,25 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        OutlinedTextField(
+            value = name,
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            leadingIcon = { Icon(imageVector = Icons.Default.Edit, contentDescription = null) },
+            label = { Text(text = stringResource(id = R.string.name)) },
+            placeholder = { Text(text = stringResource(id = R.string.yourName)) },
+            onValueChange = {
+                name = it
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = {
                 scope.launch {
-                    viewModel.registerUser(email, password)
+                    viewModel.registerUser(email, password, name)
                     Toast.makeText(context, "Проверьте вашу почту для завершения регистрации", Toast.LENGTH_LONG).show()
                     delay(1500)
                     navController.navigate(Screen.LogInScreen.route)
@@ -142,4 +159,10 @@ fun SignUpScreen(
         }*/
     }
 
+}
+
+@Preview
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen(navController = NavController(LocalContext.current))
 }

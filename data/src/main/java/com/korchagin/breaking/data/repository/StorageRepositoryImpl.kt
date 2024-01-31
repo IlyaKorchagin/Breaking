@@ -15,11 +15,11 @@ class StorageRepositoryImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage
 ) : StorageRepository {
 
-    override suspend fun uploadImage(data: ByteArray): Flow<Resource<String>> {
+    override suspend fun uploadImage(data: ByteArray, email: String): Flow<Resource<String>> {
         return flow {
             Log.d("ILYA","uploadImage")
             val storageRef = firebaseStorage.getReference("ImageDB")
-            val avatarRef = storageRef.child("avatar.jpg")
+            val avatarRef = storageRef.child("${email}-avatar.jpg")
 
            // emit(Resource.Loading())
             Log.d("ILYA","putBytes - $data")

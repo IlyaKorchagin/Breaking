@@ -69,10 +69,10 @@ fun RatingScreen(
                     Scaffold(
                         topBar = {
                             TopAppBar(
-                                title = { Text(text = "My Toolbar") },
+                                title = { Text(text = LocalContext.current.getString(R.string.backToHome)) },
                                 navigationIcon = {
-                                    IconButton(onClick = { /* Handle navigation icon click */ }) {
-                                        Icon(Icons.Default.Home, contentDescription = "Menu")
+                                    IconButton(onClick = { navController.popBackStack() }) {
+                                        Icon(Icons.Default.ArrowBack, contentDescription = "Menu")
                                     }
                                 },
                                 actions = {
@@ -178,8 +178,7 @@ fun NewRatingTable(
                                 targetValue = 1300f, showShimmer = showShimmer.value
                             )
                         )
-                        .border(3.dp, Color.Gray, CircleShape)
-                        .clickable { navController.navigate(Screen.DetailScreen.route) },
+                        .border(3.dp, Color.Gray, CircleShape),
                     onSuccess = { showShimmer.value = false },
                     contentScale = ContentScale.Crop
                 )

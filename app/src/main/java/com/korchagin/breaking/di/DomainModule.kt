@@ -1,6 +1,6 @@
 package com.korchagin.breaking.di
 
-import android.app.Application
+import com.korchagin.breaking.domain.repository.BboyRepository
 import com.korchagin.breaking.domain.repository.ElementsRepository
 import com.korchagin.breaking.domain.repository.PupilRepository
 import com.korchagin.breaking.domain.repository.StorageRepository
@@ -17,6 +17,11 @@ class DomainModule {
     @Provides
     fun provideGetCurrentPupil(pupilRepository: PupilRepository): GetCurrentPupilUseCase{
         return GetCurrentPupilUseCase(pupilRepository = pupilRepository)
+    }
+
+    @Provides
+    fun provideGetBboy(elementsRepository: ElementsRepository): GetBboyUseCase {
+        return GetBboyUseCase(elementsRepository = elementsRepository)
     }
 
     @Provides

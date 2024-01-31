@@ -6,11 +6,22 @@
     <string name="email">Email</string>
     <string name="yourEmail">Ваш еmail</string>
     <string name="password">Пароль</string>
+    <string name="name">Фамилия и имя</string>
+    <string name="yourName">Ваша фамилия и имя</string>
     <string name="yourPassword">Ваш пароль</string>
     <string name="enter">Войти</string>
     <string name="registrate">Зарегистрироваться</string>
     <string name="registration">Регистрация</string>
     <string name="app_name">BreakForYou</string>
+
+    <!--Меню-->
+    <string name="back">Назад</string>
+    <string name="backToHome">На Главную</string>
+    <string name="home">Главная</string>
+    <string name="rating">Рейтинг</string>
+    <string name="prize">Зал славы</string>
+    <string name="exit">Выход</string>
+
 
     <!--Восстановление пароля-->
     <string name="passwordRecoveryTitle">Восстановление пароля</string>

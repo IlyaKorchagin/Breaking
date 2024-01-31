@@ -9,6 +9,7 @@ import com.korchagin.breaking.domain.model.PupilEntity
 import com.korchagin.breaking.domain.repository.PupilRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.HashMap
 import javax.inject.Inject
@@ -73,12 +74,13 @@ class PupilRepositoryImpl @Inject constructor(
         }
     }
 
+
     override suspend fun getCurrentPupil(email: String) = callbackFlow<Result<PupilEntity>> {
         this@callbackFlow.trySendBlocking(
             Result.loading(null)
         )
         database.orderByChild("email").equalTo(email).get().addOnSuccessListener {
-       //     Log.d("ILYA", "Got value OnSuccess ${it.value}")
+            Log.d("ILYA", "email = $email Got value OnSuccess ${it.value}")
             if (it.exists()) {
                 for (e in it.children) {
                     this@callbackFlow.trySendBlocking(

@@ -52,6 +52,11 @@ import com.korchagin.breaking.presentation.view_model.MainViewModel
 import com.korchagin.breaking.ui.theme.Progress
 import kotlinx.coroutines.launch
 
+const val FREEZE = 0
+const val POWER = 1
+const val OFP = 2
+const val STRETCH = 3
+
 @SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -67,12 +72,14 @@ fun ElementsScreen(
     selectedTabIndex = sharedViewModel.elementTabPosition
 
     val state = viewModel.curPupil.collectAsState(initial = null)
-    Log.d("ILYA","state = $state")
+    if (state.value != null) state.value!!.data?.let { sharedViewModel.addCurrentPupil(it) }
+    Log.d("ILYA", "state = $state")
     val stateFreeze = viewModel.freezeList.collectAsState(initial = null)
     val statePower = viewModel.powerMoveList.collectAsState(initial = null)
     val stateOfp = viewModel.ofpList.collectAsState(initial = null)
     val stateStretch = viewModel.stretchList.collectAsState(initial = null)
-    if (state.value == null) viewModel.getCurrentPupil(email.substringAfter('}'))
+    Log.d("ILYA", "email = ${sharedViewModel.curPupil?.email}")
+    if (state.value == null) sharedViewModel.curPupil?.let { viewModel.getCurrentPupil(it.email) }
     if (stateFreeze.value == null) viewModel.getFreezeElements()
     if (statePower.value == null) viewModel.getPowerMoveElements()
     if (stateOfp.value == null) viewModel.getOfpElements()
@@ -106,8 +113,8 @@ fun ElementsScreen(
 
         if (state.value!!.status == Status.SUCCESS) {
             Column {
-                Log.d("ILYA","state.value = ${state.value!!.data}")
-                state.value!!.data?.let { ProfileSection(it, viewModel) }
+                Log.d("ILYA", "state.value = ${state.value!!.data}")
+                state.value!!.data?.let { ProfileSection(it, viewModel, selectedTabIndex) }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -139,7 +146,7 @@ fun ElementsScreen(
                     selectedTabIndex = it
                 }
                 when (selectedTabIndex) {
-                    0 -> {
+                    FREEZE -> {
                         val posts: MutableList<Elements> =
                             emptyList<Elements>().toMutableList()
 
@@ -174,7 +181,7 @@ fun ElementsScreen(
                     }
 
 
-                    1 -> {
+                    POWER -> {
                         val posts: MutableList<Elements> =
                             emptyList<Elements>().toMutableList()
 
@@ -208,7 +215,7 @@ fun ElementsScreen(
                         )
                     }
 
-                    2 -> {
+                    OFP -> {
                         val posts: MutableList<Elements> =
                             emptyList<Elements>().toMutableList()
 
@@ -242,7 +249,7 @@ fun ElementsScreen(
                         )
                     }
 
-                    3 -> {
+                    STRETCH -> {
                         val posts: MutableList<Elements> =
                             emptyList<Elements>().toMutableList()
 
@@ -303,7 +310,7 @@ fun RoundImage(
 }
 
 @Composable
-fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
+fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel, selectedTabIndex: Int) {
     val showShimmer = remember { mutableStateOf(true) }
     //  Log.d("ILYA", "ProfileSection run")
 
@@ -337,7 +344,7 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
                         shape = RoundedCornerShape(percent = 50)
                     )
             ) {
-                Log.d("ILYA","avatar = ${curPupil.avatar}")
+                Log.d("ILYA", "avatar = ${curPupil.avatar}")
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(curPupil.avatar)
@@ -366,15 +373,15 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            InfoSection(curPupil = curPupil)
+            InfoSection(curPupil = curPupil, selectedTabIndex)
         }
     }
     LaunchedEffect(key1 = imageUri) {
         scope.launch {
             //   Log.d("ILYA", "imageUri = $imageUri")
             imageUri?.let {
-             /*   val storageRef = Firebase.storage.reference
-                storageRef.child("ImageDB/avatar.jpg").putFile(it).await()*/
+                /*   val storageRef = Firebase.storage.reference
+                   storageRef.child("ImageDB/avatar.jpg").putFile(it).await()*/
 
                 Log.d("ILYA", "imageUri = $imageUri")
                 if (Build.VERSION.SDK_INT < 28) {
@@ -395,6 +402,7 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel) {
 @Composable
 fun InfoSection(
     curPupil: PupilEntity,
+    selectedElementsTab: Int,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -402,10 +410,28 @@ fun InfoSection(
         verticalArrangement = Arrangement.SpaceAround,
         modifier = modifier
     ) {
-        Text("${curPupil.name}@mail.ru")
-        Text("Номинация - ${curPupil.name}")
-        Text("Уровень - ${curPupil.rating}")
-        CustomProgressBar1(progress = curPupil.freeze_rating)
+        Text(curPupil.name)
+        Text("Номинация - ${setStatus(curPupil.status)}")
+        Text(setLevel(curPupil.rating.toInt()))
+        when (selectedElementsTab) {
+            FREEZE -> {
+                Text("Рейтинг по фризам - ${curPupil.freeze_rating}")
+                CustomProgressBar1(progress = curPupil.freeze_rating)
+            }
+            POWER -> {
+                Text("Рейтинг по PowerMoves - ${curPupil.powermove_rating}")
+                CustomProgressBar1(progress = curPupil.powermove_rating)
+            }
+            OFP -> {
+                Text("Рейтинг по ОФП - ${curPupil.ofp_rating}")
+                CustomProgressBar1(progress = curPupil.ofp_rating)
+            }
+            STRETCH -> {
+                Text("Рейтинг по растяжке - ${curPupil.strechingRating}")
+                CustomProgressBar1(progress = curPupil.strechingRating)
+            }
+        }
+
     }
 }
 
@@ -421,36 +447,22 @@ fun CustomProgressBar1(progress: Float) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(15.dp))
-                // on below line we are specifying
-                // height for the box
                 .height(30.dp)
-
-                // on below line we are specifying
-                // background color for box.
                 .background(Color.Gray)
-
-                // on below line we are 
-                // specifying width for the box.
                 .width(300.dp)
         ) {
             Box(
                 modifier = Modifier
-                    // on below line we are adding clip \
-                    // for the modifier with round radius as 15 dp. 
                     .clip(RoundedCornerShape(15.dp))
                     .height(30.dp)
                     .background(
                         Brush.horizontalGradient(
-                            // in this color we are specifying a gradient 
-                            // with the list of the colors. 
                             listOf(
-                                // on below line we are adding two colors. 
                                 Color(0xFF0F9D58),
                                 Color(0xF055CA4D)
                             )
                         )
                     )
-                    // on below line we are specifying width for the inner box
                     .width(300.dp * progress / 100)
             )
             Text(

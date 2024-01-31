@@ -19,9 +19,7 @@ class UserStorageImpl : UserStorage {
 
     private val PUPILS_KEY = "Pupils" //  идентификатор таблицы в БД
 
-
-
-
+    
     override suspend fun getCurrentPupil(liveData: MutableLiveData<PupilState>): PupilEntity {
         var curPupil: PupilEntry? = null
         val database = Firebase.database
@@ -65,81 +63,10 @@ class UserStorageImpl : UserStorage {
             User(name = "Ben", age = 14, rating = 5, avatar = 6)
         )
     }
-
-
-
-        /* private fun fetchUser(firebaseDatabase: FirebaseDatabase, userId: String) {
-             val coroutineScope = CoroutineScope(Dispatchers.IO)
-             coroutineScope?.launch() {
-                 val defer = async(Dispatchers.IO) {
-                     firebaseDatabase.getReference(PUPILS_KEY).orderByChild("email").equalTo(userId)
-                         .awaitSingleValue()
-                 }
-                 when (val result = defer.await()) {
-                     is RealtimeDatabaseValueResult.Success -> {
-                         val dataSnapshot: DataSnapshot = result.dataSnapshot
-                         for (childSnapshot in dataSnapshot.children) {
-                             val pupil = childSnapshot.getValue(
-                                 PupilEntry::class.java
-                             )
-                             if (pupil != null) {
-                                 Log.d("ILYA", "name - ${pupil.name}")
-                                 curPupil = pupil
-                             }
-                         }
-                         Log.d("ILYA", "Get value - $dataSnapshot")
-
-
-                     }
-                     is RealtimeDatabaseValueResult.Error -> {
-                         val error: DatabaseError = result.error
-                         Log.d("ILYA", "Error - ${error.message}")
-                     }
-                 }
-             }
-         }*/
 }
 
 
-/*
-sealed class RealtimeDatabaseValueResult {
-    class Success(val dataSnapshot: DataSnapshot) : RealtimeDatabaseValueResult()
-    class Error(val error: DatabaseError) : RealtimeDatabaseValueResult()
-}
 
-*/
-/**
- * Perform a addListenerForSingleValueEvent call on a databaseReference in a suspend function way
- * @param onCancellation action to perform if there is a cancellation
- *//*
-
-@ExperimentalCoroutinesApi
-suspend fun Query.awaitSingleValue(onCancellation: ((cause: Throwable) -> Unit)? = null) =
-    suspendCancellableCoroutine<RealtimeDatabaseValueResult> { continuation ->
-
-        val valueEventListener = object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-                continuation.resume(
-                    RealtimeDatabaseValueResult.Error(error = error),
-                    onCancellation
-                )
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                continuation.resume(
-                    RealtimeDatabaseValueResult.Success(snapshot),
-                    onCancellation
-                )
-            }
-        }
-
-        // add listener like you normally do
-        addListenerForSingleValueEvent(valueEventListener)
-
-        // in case the job, coroutine, etc. is cancelled, we remove the current event listener
-        continuation.invokeOnCancellation { removeEventListener(valueEventListener) }
-    }
-*/
 
 
 

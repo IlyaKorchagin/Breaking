@@ -2,15 +2,23 @@ package com.korchagin.breaking.presentation.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,24 +28,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.korchagin.breaking.R
 import com.korchagin.breaking.domain.model.ElementEntity
 import com.korchagin.breaking.helper.setDescriptionImage
 import com.korchagin.breaking.helper.setDescriptionText
+import com.korchagin.breaking.presentation.Screen
 import com.korchagin.breaking.presentation.view_model.ElementViewModel
-import com.korchagin.breaking.presentation.view_model.LogInViewModel
-import com.korchagin.breaking.presentation.view_model.MainViewModel
-import com.korchagin.breaking.presentation.view_model.SharedViewModel
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import dagger.hilt.android.scopes.ViewModelScoped
 
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint("UnrememberedMutableState", "UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailScreen(
@@ -48,17 +49,33 @@ fun DetailScreen(
    LaunchedEffect(key1 = element){
        Log.d("ILYA", "shared_element = $element")
    }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Log.d("ILYA", "element = $element")
-        element?.videoUrl?.let { YoutubeScreen(videoId = it, modifier = Modifier) }
-        if (element != null) {
-            DescriptionSection(element = element)
-        }
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "My Toolbar") },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Menu")
+                        }
+                    },
+                    backgroundColor = MaterialTheme.colors.primary
+                )
+            },
+            content = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Log.d("ILYA", "element = $element")
+                    element?.videoUrl?.let { YoutubeScreen(videoId = it, modifier = Modifier) }
+                    if (element != null) {
+                        DescriptionSection(element = element)
+                    }
+                }
+            }
+        )
     }
-}
+
 
 @Composable
 fun YoutubeScreen(
@@ -90,7 +107,6 @@ fun DescriptionSection(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(bottom = 57.dp)
     ) {
         items(10) { index ->
             Row(

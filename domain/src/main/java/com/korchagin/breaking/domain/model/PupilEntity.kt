@@ -81,6 +81,8 @@ data class PupilEntity(
     var finger:Int,
     var handstand:Int,
     var horizont:Int,
+    var situps:Int,
+    var presstohands:Int,
     var pushups:Int,
 
     //----------- OFP -------------
