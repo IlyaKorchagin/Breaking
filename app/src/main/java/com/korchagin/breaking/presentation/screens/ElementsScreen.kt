@@ -10,38 +10,86 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getColor
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.korchagin.breaking.R
-import com.korchagin.breaking.domain.common.*
+import com.korchagin.breaking.domain.common.LOCK
+import com.korchagin.breaking.domain.common.Status
 import com.korchagin.breaking.domain.model.ElementEntity
 import com.korchagin.breaking.domain.model.PupilEntity
-import com.korchagin.breaking.helper.*
+import com.korchagin.breaking.helper.setAvatarBorder
+import com.korchagin.breaking.helper.setElementColor
+import com.korchagin.breaking.helper.setElementImage
+import com.korchagin.breaking.helper.setLevel
+import com.korchagin.breaking.helper.setProgress
+import com.korchagin.breaking.helper.setStatus
 import com.korchagin.breaking.model.Elements
 import com.korchagin.breaking.model.ImageWithText
 import com.korchagin.breaking.presentation.Screen
@@ -49,6 +97,7 @@ import com.korchagin.breaking.presentation.screens.common.CustomProgressBar
 import com.korchagin.breaking.presentation.screens.common.shimmerBrush
 import com.korchagin.breaking.presentation.view_model.ElementViewModel
 import com.korchagin.breaking.presentation.view_model.MainViewModel
+import com.korchagin.breaking.ui.theme.Default
 import com.korchagin.breaking.ui.theme.Progress
 import kotlinx.coroutines.launch
 
@@ -222,13 +271,14 @@ fun ElementsScreen(
                         stateOfp.value?.data?.forEach {
                             posts.add(
                                 Elements(
-                                    icon = state.value?.data?.let { it1 ->
-                                        setElementImage(
-                                            elementTitle = it.title,
-                                            currentPupil = it1,
-                                            info = it
-                                        )
-                                    },
+                                    /* icon = state.value?.data?.let { it1 ->
+                                         setElementImage(
+                                             elementTitle = it.title,
+                                             currentPupil = it1,
+                                             info = it
+                                         )
+                                     },*/
+                                    icon = it.image,
                                     title = it.title,
                                     block_description = it.blockDescription,
                                     progress = state.value?.data?.let { it1 ->
@@ -256,13 +306,14 @@ fun ElementsScreen(
                         stateStretch.value?.data?.forEach {
                             posts.add(
                                 Elements(
-                                    icon = state.value?.data?.let { it1 ->
+                                    /*icon = state.value?.data?.let { it1 ->
                                         setElementImage(
                                             elementTitle = it.title,
                                             currentPupil = it1,
                                             info = it
                                         )
-                                    },
+                                    },*/
+                                    icon = it.image,
                                     title = it.title,
                                     block_description = it.blockDescription,
                                     progress = state.value?.data?.let { it1 ->
@@ -311,23 +362,7 @@ fun RoundImage(
 
 @Composable
 fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel, selectedTabIndex: Int) {
-    val showShimmer = remember { mutableStateOf(true) }
-    //  Log.d("ILYA", "ProfileSection run")
 
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val bitmap = remember {
-        mutableStateOf<Bitmap?>(null)
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-    }
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -335,69 +370,15 @@ fun ProfileSection(curPupil: PupilEntity, viewModel: MainViewModel, selectedTabI
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
-            val avatarBorderColor = setAvatarBorder(curPupil)
-            Box(
-                modifier = Modifier
-                    .border(
-                        width = 2.dp,
-                        brush = Brush.horizontalGradient(avatarBorderColor),
-                        shape = RoundedCornerShape(percent = 50)
-                    )
-            ) {
-                Log.d("ILYA", "avatar = ${curPupil.avatar}")
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(curPupil.avatar)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "default crossfade example",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(
-                            shimmerBrush(
-                                targetValue = 1300f,
-                                showShimmer = showShimmer.value
-                            )
-                        )
-                        .clickable {
-                            scope.launch {
-                                launcher.launch("image/*")
-                            }
-                        },
-                    //  .border(2.dp, avatarBorderColor, CircleShape),
-                    onSuccess = { showShimmer.value = false },
-                    contentScale = ContentScale.Crop
-                )
-            }
+            ImageBorderAnimation(curPupil = curPupil, viewModel = viewModel)
 
             Spacer(modifier = Modifier.width(4.dp))
 
             InfoSection(curPupil = curPupil, selectedTabIndex)
         }
     }
-    LaunchedEffect(key1 = imageUri) {
-        scope.launch {
-            //   Log.d("ILYA", "imageUri = $imageUri")
-            imageUri?.let {
-                /*   val storageRef = Firebase.storage.reference
-                   storageRef.child("ImageDB/avatar.jpg").putFile(it).await()*/
-
-                Log.d("ILYA", "imageUri = $imageUri")
-                if (Build.VERSION.SDK_INT < 28) {
-                    bitmap.value = MediaStore.Images
-                        .Media.getBitmap(context.contentResolver, it)
-
-                } else {
-                    val source = ImageDecoder
-                        .createSource(context.contentResolver, it)
-                    bitmap.value = ImageDecoder.decodeBitmap(source)
-                }
-            }
-            bitmap.value?.let { viewModel.uploadImage(it) }
-        }
-    }
 }
+
 
 @Composable
 fun InfoSection(
@@ -405,33 +386,83 @@ fun InfoSection(
     selectedElementsTab: Int,
     modifier: Modifier = Modifier
 ) {
+    var text = ""
+    var rating = 0
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceAround,
         modifier = modifier
     ) {
-        Text(curPupil.name)
-        Text("Номинация - ${setStatus(curPupil.status)}")
-        Text(setLevel(curPupil.rating.toInt()))
+        Text(curPupil.name,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier
+                .graphicsLayer(alpha = 0.8f)
+                .drawWithCache {
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    Default,
+                                    Color.Black
+                                )
+                            ), blendMode = BlendMode.SrcAtop
+                        )
+                    }
+                })
+        /*  Text(
+              setStatus(curPupil.status),
+              style = TextStyle(
+                  textAlign = TextAlign.Center,
+                  fontSize = 14.sp,
+                  fontWeight = FontWeight.Bold
+              )
+          )*/
+        Text(
+            setLevel(curPupil.rating.toInt()),
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+
         when (selectedElementsTab) {
             FREEZE -> {
-                Text("Рейтинг по фризам - ${curPupil.freeze_rating}")
-                CustomProgressBar1(progress = curPupil.freeze_rating)
+                text = "Рейтинг по фризам: "
+                rating = curPupil.freeze_rating.toInt()
             }
+
             POWER -> {
-                Text("Рейтинг по PowerMoves - ${curPupil.powermove_rating}")
-                CustomProgressBar1(progress = curPupil.powermove_rating)
+                text = "Рейтинг по PowerMoves: "
+                rating = curPupil.powermove_rating.toInt()
             }
+
             OFP -> {
-                Text("Рейтинг по ОФП - ${curPupil.ofp_rating}")
-                CustomProgressBar1(progress = curPupil.ofp_rating)
+                text = "Рейтинг по ОФП: "
+                rating = curPupil.ofp_rating.toInt()
             }
+
             STRETCH -> {
-                Text("Рейтинг по растяжке - ${curPupil.strechingRating}")
-                CustomProgressBar1(progress = curPupil.strechingRating)
+                text = "Рейтинг по растяжке: "
+                rating = curPupil.strechingRating.toInt()
             }
         }
 
+        Text(
+            text = text,
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        CustomProgressBar1(progress = curPupil.freeze_rating)
     }
 }
 
@@ -439,7 +470,12 @@ fun InfoSection(
 fun CustomProgressBar1(progress: Float) {
     Column(
         modifier = Modifier
-            .padding(end = 10.dp)
+            .padding(vertical = 4.dp)
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+                shape = RoundedCornerShape(15.dp)
+            )
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -448,7 +484,7 @@ fun CustomProgressBar1(progress: Float) {
             modifier = Modifier
                 .clip(RoundedCornerShape(15.dp))
                 .height(30.dp)
-                .background(Color.Gray)
+                .background(Color(getColor(LocalContext.current, R.color.light_gray)))
                 .width(300.dp)
         ) {
             Box(
@@ -456,12 +492,7 @@ fun CustomProgressBar1(progress: Float) {
                     .clip(RoundedCornerShape(15.dp))
                     .height(30.dp)
                     .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF0F9D58),
-                                Color(0xF055CA4D)
-                            )
-                        )
+                        Brush.horizontalGradient(listOf(Color.White, Progress))
                     )
                     .width(300.dp * progress / 100)
             )
@@ -470,7 +501,7 @@ fun CustomProgressBar1(progress: Float) {
                 modifier = Modifier.align(Alignment.Center),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color.Black
             )
         }
 
@@ -518,14 +549,6 @@ fun PostTabView(
                     )
                     Text(text = item.text)
                 }
-                /* Icon(
-                     painter = item.image,
-                     contentDescription = item.text,
-                     tint = if(selectedTabIndex == index) Color.Black else inactiveColor,
-                     modifier = Modifier
-                         .padding(10.dp)
-                         .size(50.dp)
-                 )*/
             }
         }
     }
@@ -567,6 +590,7 @@ fun PostSection(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 val borderColor = setElementColor(value.title)
+
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(value.icon)
@@ -646,5 +670,81 @@ fun PostSection(
         }
     }
 }
+
+@Composable
+fun ImageBorderAnimation(curPupil: PupilEntity, viewModel: MainViewModel) {
+    val showShimmer = remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val context = LocalContext.current
+    val bitmap = remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+    val infiniteTransition = rememberInfiniteTransition()
+    val rotationValue = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            tween(2000, easing = LinearEasing)
+        )
+    )
+    //Log.d("ILYA", "avatar = ${curPupil.avatar}")
+    val avatarBorderColor = setAvatarBorder(curPupil)
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(curPupil.avatar)
+            .crossfade(true)
+            .build(),
+        contentDescription = "default crossfade example",
+        modifier = Modifier
+            .drawBehind {
+                rotate(rotationValue.value) {
+                    drawCircle(
+                        Brush.horizontalGradient(
+                            avatarBorderColor
+                        ), style = Stroke(10f)
+                    )
+                }
+            }
+            .size(120.dp)
+            .clip(CircleShape)
+            .background(
+                shimmerBrush(
+                    targetValue = 1300f,
+                    showShimmer = showShimmer.value
+                )
+            )
+            .clickable {
+                scope.launch {
+                    launcher.launch("image/*")
+                }
+            },
+        onSuccess = { showShimmer.value = false },
+        contentScale = ContentScale.Crop
+    )
+    LaunchedEffect(key1 = imageUri) {
+        scope.launch {
+            imageUri?.let {
+                if (Build.VERSION.SDK_INT < 28) {
+                    bitmap.value = MediaStore.Images
+                        .Media.getBitmap(context.contentResolver, it)
+                } else {
+                    val source = ImageDecoder
+                        .createSource(context.contentResolver, it)
+                    bitmap.value = ImageDecoder.decodeBitmap(source)
+                }
+            }
+            bitmap.value?.let { viewModel.uploadImage(it, curPupil.email) }
+        }
+    }
+}
+
 
 

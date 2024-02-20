@@ -17,7 +17,7 @@ const val HOLLOWBACK = "Hollowback"
 
 // PowerMove
 const val BACKSPIN = "Backspin"
-const val TURTLEMOVE = "Turtle"
+const val TURTLEMOVE = "TurtleMove"
 const val SWIPES = "Swipes"
 const val HEADSPIN = "HeadSpin"
 const val WINDMILL = "Windmill"

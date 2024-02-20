@@ -284,12 +284,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun uploadImage(bitmap: Bitmap) = viewModelScope.launch {
+    fun uploadImage(bitmap: Bitmap, email: String) = viewModelScope.launch {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
-        Log.d("ILYA", "uploadImage data = $data")
-        uploadImageUseCase.invoke(data, pupilEmail).collect { result ->
+        Log.d("ILYA", "uploadImage data = $data | email = $email")
+        uploadImageUseCase.invoke(data, email).collect { result ->
             Log.d("ILYA", "uploadImage result = ${result.data}")
             when (result) {
                 is Resource.Success -> {

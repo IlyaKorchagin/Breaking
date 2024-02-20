@@ -35,7 +35,7 @@ fun setElementImage(
             else LOCK
         }
         AIRFLARE -> {
-            if (currentPupil.handstand >= 80 && currentPupil.flare >= 80) info.image
+            if (currentPupil.handstand >= 80) info.image
             else LOCK
         }
         CRICKET -> {

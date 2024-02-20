@@ -56,7 +56,7 @@ class PupilRepositoryImpl @Inject constructor(
         userId: String,
         hashMap: HashMap<String?, Any?>
     ) = callbackFlow<Result<Boolean>> {
-        Log.d("ILYA", "update hashMap - $hashMap")
+        Log.d("ILYA", "update hashMap - $hashMap | userId = $userId")
             database.child(userId).updateChildren(hashMap)
                 .addOnCompleteListener { if(it.isSuccessful){
                     Log.d("ILYA", "update Success")
