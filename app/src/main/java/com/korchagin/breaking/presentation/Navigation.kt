@@ -1,5 +1,7 @@
 package com.korchagin.breaking.presentation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -17,10 +19,13 @@ import com.korchagin.breaking.presentation.screens.BboysScreen
 import com.korchagin.breaking.presentation.screens.RatingScreen
 import com.korchagin.breaking.presentation.screens.SignUpScreen
 import com.korchagin.breaking.presentation.screens.SplashScreen
+import com.korchagin.breaking.presentation.screens.MyAccountScreen
+import com.korchagin.breaking.presentation.screens.UserAccountScreen
 import com.korchagin.breaking.presentation.screens.common.AppBarState
 import com.korchagin.breaking.presentation.view_model.ElementViewModel
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation(navController: NavHostController, appBarState: AppBarState) {
     val sharedViewModel: ElementViewModel = viewModel()
@@ -44,9 +49,15 @@ fun Navigation(navController: NavHostController, appBarState: AppBarState) {
         composable(route = Screen.BboysDetailScreen.route) {
             BboysDetailScreen(navController = navController, sharedViewModel = sharedViewModel)
         }
-        composable(route = Screen.DetailScreen.route
-        ) {
-            DetailScreen(navController = navController, sharedViewModel = sharedViewModel)
+        composable(route = Screen.MyAccountScreen.route) {
+            MyAccountScreen(navController = navController, sharedViewModel = sharedViewModel)
+        }
+        composable(route = Screen.UserAccountScreen.route) {
+            UserAccountScreen(navController = navController, sharedViewModel = sharedViewModel)
+        }
+        composable(
+            route = Screen.DetailScreen.route) {
+                DetailScreen(navController = navController, sharedViewModel = sharedViewModel)
         }
         composable(
             route = Screen.ElementsScreen.route,
@@ -54,14 +65,19 @@ fun Navigation(navController: NavHostController, appBarState: AppBarState) {
                 type = NavType.StringType
             })
         ) { entry ->
-            entry.arguments?.getString("$EMAIL_KEY")?.let { it1 ->
-                ElementsScreen(navController = navController, email = it1, sharedViewModel = sharedViewModel)
+            entry.arguments?.getString(EMAIL_KEY)?.let { it1 ->
+                //          Log.d("ILYA", "email = $it1")
+                ElementsScreen(
+                    navController = navController,
+                    email = it1,
+                    sharedViewModel = sharedViewModel
+                )
             }
         }
         composable(
             route = Screen.RatingScreen.route
         ) {
-            RatingScreen(navController = navController, onComposing = {appBarState})
+            RatingScreen(navController = navController, sharedViewModel = sharedViewModel, onComposing = { appBarState })
         }
     }
 }

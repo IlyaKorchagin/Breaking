@@ -4,6 +4,8 @@ import com.korchagin.breaking.domain.common.EMAIL_KEY
 
 sealed class Screen(val route: String){
     object MainScreen: Screen("main_screen")
+    object MyAccountScreen: Screen("my_account_screen")
+    object UserAccountScreen: Screen("user_account_screen")
     object DetailScreen: Screen("detail_screen")
     object ElementsScreen: Screen("elements_screen/{$EMAIL_KEY}")
     object RatingScreen: Screen("rating_screen")

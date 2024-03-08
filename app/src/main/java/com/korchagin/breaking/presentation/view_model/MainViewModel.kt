@@ -16,6 +16,7 @@ import com.korchagin.breaking.presentation.model.MediaState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
@@ -66,6 +67,7 @@ class MainViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<String>(EMAIL_KEY)?.let { email ->
+            Log.d("ILYA", "VM INIT - email = $email")
             pupilEmail = email.substringAfter('}')
             getCurrentPupil(pupilEmail)
             getFreezeElements()
@@ -105,6 +107,7 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
     fun getBboys() {
         viewModelScope.launch(Dispatchers.IO) {
             getBboysUseCase.invoke().collect {
@@ -138,13 +141,13 @@ class MainViewModel @Inject constructor(
     fun getPowerMoveElements() {
         viewModelScope.launch(Dispatchers.IO) {
             getPowerMoveElementsUseCase.invoke().collect {
-                Log.d("ILYA", "get power - ${it.status} | ${it.data}")
+   //             Log.d("ILYA", "get power - ${it.status} | ${it.data}")
                 _powerMoveList.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
-                        Log.d("ILYA", "Success get data")
+//                        Log.d("ILYA", "Success get data")
                         it.data?.let { items ->
-                            Log.d("ILYA", "Success get data $items")
+ //                           Log.d("ILYA", "Success get data $items")
                             _powerMoveList.send(Result.success(items))
                         }
                     }
@@ -168,13 +171,13 @@ class MainViewModel @Inject constructor(
     fun getOfpElements() {
         viewModelScope.launch(Dispatchers.IO) {
             getOfpElementsUseCase.invoke().collect {
-                Log.d("ILYA", "get power - ${it.status} | ${it.data}")
+ //               Log.d("ILYA", "get power - ${it.status} | ${it.data}")
                 _ofpList.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
-                        Log.d("ILYA", "Success get data")
+//                        Log.d("ILYA", "Success get data")
                         it.data?.let { items ->
-                            Log.d("ILYA", "Success get data $items")
+                           // Log.d("ILYA", "Success get data $items")
                             _ofpList.send(Result.success(items))
                         }
                     }
@@ -188,7 +191,6 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
-
                     else -> {}
                 }
             }
@@ -198,17 +200,16 @@ class MainViewModel @Inject constructor(
     fun getStretchElements() {
         viewModelScope.launch(Dispatchers.IO) {
             getStretchElementsUseCase.invoke().collect {
-                Log.d("ILYA", "get power - ${it.status} | ${it.data}")
+               // Log.d("ILYA", "get power - ${it.status} | ${it.data}")
                 _stretchList.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
-                        Log.d("ILYA", "Success get data")
+                       // Log.d("ILYA", "Success get data")
                         it.data?.let { items ->
-                            Log.d("ILYA", "Success get data $items")
+                          //  Log.d("ILYA", "Success get data $items")
                             _stretchList.send(Result.success(items))
                         }
                     }
-
                     Status.ERROR -> {
                         //    Log.d("ILYA", "Success get error")
                         _stretchList.send(
@@ -218,7 +219,6 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
-
                     else -> {}
                 }
             }
@@ -228,7 +228,7 @@ class MainViewModel @Inject constructor(
     fun getCurrentPupil(email: String) {
         viewModelScope.launch(Dispatchers.IO) {
             getCurrentPupilUseCase.invoke(email).collect {
-                  Log.d("ILYA", "get ${it.status}")
+              //  Log.d("ILYA", "get ${it.status}")
                 _curPupil.send(Result.loading(null))
                 when (it.status) {
                     Status.SUCCESS -> {
@@ -249,7 +249,6 @@ class MainViewModel @Inject constructor(
                             )
                         )
                     }
-
                     else -> {}
                 }
             }
@@ -261,23 +260,10 @@ class MainViewModel @Inject constructor(
             updateAvatarUseCase.invoke(userId = userId, userAvatar = userAvatar).collect {
                 when (it.status) {
                     Status.SUCCESS -> {
-                        Log.d("ILYA", "Success update data")
-                        /*  it.data?.let { items ->
-                              Log.d("ILYA", "Success get data $items")
-                              _curPupil.send(Result.success(items))
-                          }*/
+                    //    Log.d("ILYA", "Success update data")
                         getCurrentPupil(pupilEmail)
                     }
-
-                    Status.ERROR -> {
-                        //       Log.d("ILYA", "update error")
-                        /*_curPupil.send( Result.error(
-                            "Failed to grab items from Firebase",
-                            PupilEntity()
-                        )
-                        )*/
-                    }
-
+                    Status.ERROR -> {}
                     else -> {}
                 }
             }
@@ -288,20 +274,18 @@ class MainViewModel @Inject constructor(
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val data = baos.toByteArray()
-        Log.d("ILYA", "uploadImage data = $data | email = $email")
+       // Log.d("ILYA", "uploadImage data = $data | email = $email")
         uploadImageUseCase.invoke(data, email).collect { result ->
-            Log.d("ILYA", "uploadImage result = ${result.data}")
+           // Log.d("ILYA", "uploadImage result = ${result.data}")
             when (result) {
                 is Resource.Success -> {
-                    Log.d("ILYA", "Success - ${result.data}")
-                    //  _mediaState.send(MediaState(isSuccess = result.data))
+                  //  Log.d("ILYA", "Success - ${result.data}")
                     val hashMap: HashMap<String?, Any?> = HashMap<String?, Any?>()
                     hashMap["avatar"] = result.data
                     val id = preferences.getCurrentPupilId()
-                    Log.d("ILYA", "Success currentPupilId - $id")
+                  //  Log.d("ILYA", "Success currentPupilId - $id")
                     updateAvatar(id, hashMap)
                 }
-
                 is Resource.Loading -> {
                     // _mediaState.send(MediaState(isLoading = true))
                 }

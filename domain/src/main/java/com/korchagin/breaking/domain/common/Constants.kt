@@ -1,7 +1,7 @@
 package com.korchagin.breaking.domain.common
 
 const val EMAIL_KEY = "email"
-const val ELEMENT_KEY = "Element"
+const val RATING = "rating"
 
 // Freeze
 const val BABY = "Baby"
@@ -10,8 +10,8 @@ const val TURTLE = "Turtle"
 const val HEAD = "Head"
 const val CHAIR = "Chair"
 const val ELBOW = "Elbow"
-const val HEAD_HOLLOWBACK = "Head Hollowback"
-const val ONE_HAND = "One Hand"
+const val HEAD_HOLLOWBACK = "HeadHollowback"
+const val ONE_HAND = "OneHand"
 const val INVERT = "Invert"
 const val HOLLOWBACK = "Hollowback"
 

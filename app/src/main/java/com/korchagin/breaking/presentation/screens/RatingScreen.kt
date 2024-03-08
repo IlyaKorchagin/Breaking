@@ -44,6 +44,7 @@ import com.korchagin.breaking.presentation.screens.common.AppBarState
 import com.korchagin.breaking.presentation.screens.common.CustomProgressBar
 import com.korchagin.breaking.presentation.screens.common.shimmerBrush
 import com.korchagin.breaking.presentation.view_model.AllPupilsViewModel
+import com.korchagin.breaking.presentation.view_model.ElementViewModel
 import com.korchagin.breaking.ui.theme.Progress
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -51,6 +52,7 @@ import com.korchagin.breaking.ui.theme.Progress
 fun RatingScreen(
     onComposing: (AppBarState) -> Unit,
     navController: NavController,
+    sharedViewModel: ElementViewModel,
     viewModel: AllPupilsViewModel = hiltViewModel()
 ) {
     val checkedState = remember { mutableStateOf(true) }
@@ -85,7 +87,7 @@ fun RatingScreen(
                         },
                         content = {
                             if (checkedState.value) NewRatingTable(
-                                ratingList = pupilsList, navController = navController
+                                ratingList = pupilsList, navController = navController, sharedViewModel = sharedViewModel
                             )
                             else {
                                 RatingTable(
@@ -140,7 +142,7 @@ fun RatingScreen(
 
 @Composable
 fun NewRatingTable(
-    ratingList: List<PupilEntity>, navController: NavController, modifier: Modifier = Modifier
+    ratingList: List<PupilEntity>, sharedViewModel: ElementViewModel, navController: NavController, modifier: Modifier = Modifier
 ) {
     val showShimmer = remember { mutableStateOf(true) }
     LazyColumn(
@@ -151,6 +153,7 @@ fun NewRatingTable(
         itemsIndexed(ratingList) { index, value ->
             val startBackgroundColor = Color.White
             val endBackgroundColor = setPositionBackgroundColor(index)
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,11 +164,13 @@ fun NewRatingTable(
                             ), startX = 300.0f
                         )
                     )
-                    .padding(5.dp),
+                    .padding(5.dp)
+                    .clickable { sharedViewModel.addClickedPupil(value)
+                        navController.navigate(Screen.UserAccountScreen.route) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Log.d("ILYA","(image = ${value.avatar}")
+        //        Log.d("ILYA","(image = ${value.avatar}")
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current).data(value.avatar)
                         .crossfade(true).build(),
@@ -200,7 +205,6 @@ fun NewRatingTable(
                                     color = Color.Gray,
                                     shape = RoundedCornerShape(5.dp)
                                 ),
-                            width = 300.dp,
                             Color.White,
                             Brush.horizontalGradient(listOf(Color.White, Progress)),
                             progress.toInt(),

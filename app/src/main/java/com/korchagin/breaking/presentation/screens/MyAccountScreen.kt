@@ -1,17 +1,30 @@
 package com.korchagin.breaking.presentation.screens
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,7 +32,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -29,57 +41,65 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.korchagin.breaking.R
+import com.korchagin.breaking.domain.model.PupilEntity
+import com.korchagin.breaking.helper.setAvatarBorder
+import com.korchagin.breaking.presentation.Screen
+import com.korchagin.breaking.presentation.screens.common.ExitAlertDialog
 import com.korchagin.breaking.presentation.screens.common.shimmerBrush
 import com.korchagin.breaking.presentation.view_model.ElementViewModel
+import com.korchagin.breaking.presentation.view_model.LogInViewModel
+import com.korchagin.breaking.presentation.view_model.MainViewModel
 import com.korchagin.breaking.ui.theme.Bronze
 import com.korchagin.breaking.ui.theme.Silver
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnrememberedMutableState", "UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun BboysDetailScreen(
+fun MyAccountScreen(
     navController: NavController,
     sharedViewModel: ElementViewModel,
+    viewModel: LogInViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
 ) {
-    val bboy = sharedViewModel.bboy
+    val curPupil = sharedViewModel.curPupil
     val showShimmer = remember { mutableStateOf(true) }
-    LaunchedEffect(key1 = bboy) {
-     //   Log.d("ILYA", "shared_element = $bboy")
-    }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,6 +107,11 @@ fun BboysDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showDialog = true }) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Search")
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primary
@@ -107,8 +132,21 @@ fun BboysDetailScreen(
                     .verticalScroll(rememberScrollState())
 
             ) {
-         //       Log.d("ILYA", "element = $bboy")
-                if (bboy != null) {
+
+                if (showDialog) {
+                    ExitAlertDialog(
+                        onConfirmExit = {
+                            viewModel.signOut()
+                            navController.navigate(Screen.LogInScreen.route) {
+                                popUpTo(Screen.LogInScreen.route) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        onDismiss = { showDialog = false }
+                    )
+                }
+                if (curPupil != null) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -119,13 +157,18 @@ fun BboysDetailScreen(
                             modifier = Modifier
                                 .border(
                                     width = 3.dp,
-                                    brush = Brush.horizontalGradient(listOf(Color.Black, Silver)),
+                                    brush = Brush.horizontalGradient(
+                                        listOf(
+                                            Color.Black,
+                                            Silver
+                                        )
+                                    ),
                                     shape = RoundedCornerShape(percent = 50)
                                 )
                         ) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
-                                    .data(bboy.avatar)
+                                    .data(curPupil.avatar)
                                     .crossfade(true)
                                     .build(),
                                 contentDescription = "default crossfade example",
@@ -149,7 +192,7 @@ fun BboysDetailScreen(
                                     .wrapContentSize(Alignment.Center)
                             ) {
                                 Text(
-                                    text = bboy.name,
+                                    text = curPupil.name,
                                     letterSpacing = 0.1.em,
                                     fontFamily = FontFamily.Serif,
                                     style = TextStyle(
@@ -178,23 +221,19 @@ fun BboysDetailScreen(
                             }
                             StyledTextScreen(
                                 title = "Возраст: ",
-                                description =   if(bboy.born.isNotEmpty()) calculateAge(bboy.born).toString()
+                                description =   if(curPupil.born.isNotEmpty()) calculateAge(curPupil.born).toString()
                                 else "не указано"
                             )
-                            StyledTextScreen(title = "Дата рождения: ", description = bboy.born)
-                            StyledTextScreen(title = "Страна: ", description = bboy.country)
+                            StyledTextScreen(title = "Дата рождения: ", description = curPupil.born)
+                            StyledTextScreen(title = "Страна: ", description = curPupil.country)
+                            StyledTextScreen(title = "Город: ", description = curPupil.city)
                         }
 
                     }
 
                     YoutubeScreen(
-                        videoId = bboy.video,
+                        videoId = curPupil.video,
                         modifier = Modifier.padding(vertical = 16.dp)
-                    )
-
-                    ExpandableTextField(
-                        shortDescription = bboy.shortdescription,
-                        fullDescription = bboy.description
                     )
 
                 }
@@ -203,102 +242,3 @@ fun BboysDetailScreen(
     )
 }
 
-@Composable
-fun ExpandableTextField(shortDescription: String, fullDescription: String) {
-    var expanded by remember { mutableStateOf(false) }
-
-    val text = if (expanded) {
-        buildAnnotatedString {
-            append("$fullDescription\n")
-            withStyle(
-                SpanStyle(
-                   fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append("\n     Нажмите здесь, чтобы увидеть короткое описание.")
-            }
-        }
-    } else {
-        buildAnnotatedString {
-            append("$shortDescription\n")
-            withStyle(
-                SpanStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            ) {
-                append("\n     Нажмите здесь, чтобы увидеть полное описание.")
-            }
-        }
-    }
-
-    val title = if (expanded) {
-        "Полное описание."
-    } else {
-        "Краткое описание."
-    }
-
-    Text(
-        text = title,
-        style = MaterialTheme.typography.h6,
-        fontFamily = FontFamily.Serif,
-        textDecoration = TextDecoration.Underline,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        textAlign = TextAlign.Center
-    )
-
-    ClickableText(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .border(
-                2.dp,
-                brush = Brush.horizontalGradient(listOf(Color.Black, Silver)),
-                shape = RoundedCornerShape(4.dp)
-            )
-            .border(2.dp, Color.Gray, shape = RoundedCornerShape(4.dp))
-            .padding(8.dp),
-        text = text,
-        onClick = {
-            expanded = !expanded
-        },
-        style = TextStyle(
-            color = Color.Black,
-            fontSize = if (expanded) 14.sp else 18.sp
-
-        )
-    )
-    Content(modifier = Modifier.fillMaxSize(0.1f).offset(x=16.dp, y=-40.dp), gif = R.drawable.click)
-}
-
-
-@Composable
-fun StyledTextScreen(title: String, description: String) {
-    val styledText = buildAnnotatedString {
-        withStyle(style = SpanStyle(color = Color.Gray, fontSize = 11.sp)) {
-            append(title)
-        }
-        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, fontSize = 14.sp)) {
-            append(description)
-        }
-    }
-
-    Text(
-        text = styledText,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        textAlign = TextAlign.Center
-    )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun calculateAge(dateOfBirthString: String): Int {
-    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("ru"))
-    val dateOfBirth = LocalDate.parse(dateOfBirthString, formatter)
-    val currentDate = LocalDate.now()
-    val period = java.time.Period.between(dateOfBirth, currentDate)
-    return period.years
-}

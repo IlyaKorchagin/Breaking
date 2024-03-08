@@ -21,7 +21,7 @@ class BboysRepositoryImpl @Inject constructor(
     override suspend fun getAllBboys(rating: String) = callbackFlow<Result<List<BboyEntity>>> {
 
         database.orderByChild(rating).get().addOnSuccessListener {
-            Log.d("ILYA", "Got value OnSuccess ${it.value}")
+         //   Log.d("ILYA", "Got value OnSuccess ${it.value}")
             val bboyList: MutableList<BboyEntity> =
                 emptyList<BboyEntity>().toMutableList()
             if (it!!.exists()) {

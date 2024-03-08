@@ -56,10 +56,10 @@ class PupilRepositoryImpl @Inject constructor(
         userId: String,
         hashMap: HashMap<String?, Any?>
     ) = callbackFlow<Result<Boolean>> {
-        Log.d("ILYA", "update hashMap - $hashMap | userId = $userId")
+      //  Log.d("ILYA", "update hashMap - $hashMap | userId = $userId")
             database.child(userId).updateChildren(hashMap)
                 .addOnCompleteListener { if(it.isSuccessful){
-                    Log.d("ILYA", "update Success")
+              //      Log.d("ILYA", "update Success")
                     this@callbackFlow.trySendBlocking(
                         Result.success(true)
                     )
@@ -73,7 +73,6 @@ class PupilRepositoryImpl @Inject constructor(
 
         }
     }
-
 
     override suspend fun getCurrentPupil(email: String) = callbackFlow<Result<PupilEntity>> {
         this@callbackFlow.trySendBlocking(

@@ -5,6 +5,10 @@ data class PupilEntity(
     //---------- Personal information -----------
     var id: String,
     var name: String,
+    var born: String,
+    var video: String,
+    var country: String,
+    var city: String,
     var email: String,
     var avatar: String,
     var status: Int,

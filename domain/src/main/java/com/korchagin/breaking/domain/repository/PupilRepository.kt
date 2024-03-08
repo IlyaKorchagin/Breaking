@@ -9,4 +9,4 @@ interface PupilRepository {
     suspend fun getCurrentPupil(email: String): Flow<Result<PupilEntity>>
     suspend fun getAllPupils(filter: String): Flow<Result<List<PupilEntity>>>
     suspend fun updateAvatar(userId: String, hashMap: HashMap<String?, Any?>): Flow<Result<Boolean>>
-}
+    }

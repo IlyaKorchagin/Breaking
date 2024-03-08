@@ -8,6 +8,8 @@ import androidx.activity.viewModels
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
@@ -20,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -30,6 +33,7 @@ import com.korchagin.breaking.presentation.model.BottomNavItem
 import com.korchagin.breaking.presentation.model.MenuItem
 import com.korchagin.breaking.presentation.screens.BottomNavigationBar
 import com.korchagin.breaking.presentation.screens.common.AppBarState
+import com.korchagin.breaking.presentation.screens.common.ExitAlertDialog
 import com.korchagin.breaking.presentation.screens.main_screen.DrawerBody
 import com.korchagin.breaking.presentation.screens.main_screen.DrawerHeader
 import com.korchagin.breaking.presentation.view_model.LogInViewModel
@@ -96,7 +100,11 @@ class MainActivity : ComponentActivity() {
                                         name = applicationContext.getString(R.string.prize),
                                         route = Screen.BboysScreen.route,
                                         icon = Icons.Default.Favorite
-
+                                    ),
+                                    BottomNavItem(
+                                        name = applicationContext.getString(R.string.user_account),
+                                        route = Screen.MyAccountScreen.route,
+                                        icon = Icons.Default.AccountCircle
                                     )
                                 ),
                                 navController = navController,

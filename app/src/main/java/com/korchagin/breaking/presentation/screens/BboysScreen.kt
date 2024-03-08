@@ -79,7 +79,7 @@ fun BboysScreen(
             tween(1000, easing = LinearEasing)
         )
     )
-    Log.d("ILYA", "BboysScreen run curPupil = ${sharedViewModel.curPupil}")
+  //  Log.d("ILYA", "BboysScreen run curPupil = ${sharedViewModel.curPupil}")
     if (state.value != null && sharedViewModel.curPupil != null) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),

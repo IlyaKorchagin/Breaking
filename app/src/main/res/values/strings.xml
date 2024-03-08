@@ -21,6 +21,7 @@
     <string name="rating">Рейтинг</string>
     <string name="prize">Зал славы</string>
     <string name="exit">Выход</string>
+    <string name="user_account">Профиль</string>
 
 
     <!--Восстановление пароля-->
@@ -29,7 +30,7 @@
 
     <!--Основной экран-->
     <string name="FreezeTitle">Freeze</string>
-    <string name="PowerMoveTitle">PowerMove</string>
+    <string name="PowerMoveTitle">Move</string>
     <string name="OFPTitle">ОФП</string>
     <string name="StretchTitle">Stretch</string>
 

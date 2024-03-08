@@ -32,7 +32,7 @@ class LogInViewModel @Inject constructor(
     val userName = _userName.receiveAsFlow()
 
     suspend fun checkVerification(){
-        Log.d("ILYA","checkVerification() - ${repository.checkVerification()}")
+  //      Log.d("ILYA","checkVerification() - ${repository.checkVerification()}")
         _currentEmail.send(repository.checkVerification())
     }
     fun registerUser(email: String, password: String, name: String) = viewModelScope.launch {
@@ -67,9 +67,8 @@ class LogInViewModel @Inject constructor(
         }
     }
 
-    fun signOut() = viewModelScope.launch {
-        repository.signOut()
-    }
+    fun signOut() = repository.signOut()
+
 
      fun passwordRecovery(email: String) {
          viewModelScope.launch {

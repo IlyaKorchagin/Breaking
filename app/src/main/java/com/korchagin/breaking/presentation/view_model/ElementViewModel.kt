@@ -11,11 +11,18 @@ import com.korchagin.breaking.domain.model.PupilEntity
 class ElementViewModel: ViewModel() {
     var element by mutableStateOf<ElementEntity?>(null)
         private set
+    var elementRating by mutableStateOf<Int>(0)
+        private set
     var curPupil by mutableStateOf<PupilEntity?>(null)
+        private set
+    var clickedPupil by mutableStateOf<PupilEntity?>(null)
         private set
     var bboy by mutableStateOf<BboyEntity?>(null)
         private set
 
+    fun addClickedPupil(pupil: PupilEntity) {
+        clickedPupil = pupil
+    }
     fun addCurrentPupil(pupil: PupilEntity) {
         curPupil = pupil
     }
@@ -27,8 +34,11 @@ class ElementViewModel: ViewModel() {
         element = currentElement
     }
 
+    fun addElementRating(rating: Int) {
+        elementRating = rating
+    }
+
     var elementTabPosition by mutableStateOf<Int>(0)
-        private set
 
     fun setPosition(position: Int) {
         elementTabPosition = position

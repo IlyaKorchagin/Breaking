@@ -10,7 +10,10 @@ data class PupilEntry(
     var name: String? = "",
     var email: String? = "",
     var avatar: String? = "",
-
+    var born: String? = "",
+    var country: String? = "",
+    var city: String? = "",
+    var video: String? = "",
     var status: Int? = 0,
     /*
         0 - не указан;

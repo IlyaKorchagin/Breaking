@@ -11,6 +11,11 @@ class PupilMapper : Mapper<PupilEntry?, PupilEntity> {
         email = input?.email.orEmpty(),
         avatar = input?.avatar.orEmpty(),
 
+        born = input?.born.orEmpty(),
+        country = input?.country.orEmpty(),
+        city = input?.city.orEmpty(),
+        video = input?.video.orEmpty(),
+
         status = input?.status ?: 0,
         subscription = input?.subscription ?: 0,
         subscriptionDay = input?.subscriptionDay ?: 0,
